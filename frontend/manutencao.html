@@ -1,0 +1,360 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Safe Energy • Manutenção</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="EnergiaVerdeLogo.png">
+  <link rel="stylesheet" href="manutencao.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+
+<body>
+<div class="app">
+
+  <div class="nav-overlay" id="navOverlay"></div>
+
+  <!-- ══════════════════════════════════════
+       SIDEBAR
+  ══════════════════════════════════════ -->
+  <aside class="sidenav" id="sidenav">
+
+    <div class="sidenav-brand">
+      <img src="EnergiaVerdeLogo.png" alt="Safe Energy">
+      <div>
+        <div class="brand-name">Safe Energy</div>
+        <div class="brand-sub">Monitoramento de consumo</div>
+      </div>
+    </div>
+
+    <!-- Navegação principal -->
+    <nav class="sidenav-nav">
+      <div class="nav-section-label">Painéis</div>
+
+      <button class="nav-item active" data-page="consumo">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/>
+        </svg>
+        Consumo
+      </button>
+
+      <button class="nav-item" data-page="potencia">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+        </svg>
+        Potência
+      </button>
+
+      <button class="nav-item" data-page="medicoes">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+        </svg>
+        Medições
+      </button>
+
+      <button class="nav-item" data-page="alertas">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+          <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+        </svg>
+        Alertas
+      </button>
+
+      <button class="nav-item" data-page="dispositivos">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 3H8M12 3v4"/>
+        </svg>
+        Dispositivos
+      </button>
+    </nav>
+
+    <!-- Ações -->
+    <div class="sidenav-actions">
+      <button class="btn-action primary" id="btnRefresh">↺ Atualizar dados</button>
+      <button class="btn-action" id="btnExportSensors">⬇ Exportar dispositivos (CSV)</button>
+      <button class="btn-action" id="btnExportEvents">⬇ Exportar alertas (CSV)</button>
+    </div>
+  </aside>
+
+  <!-- ══════════════════════════════════════
+       CONTEÚDO
+  ══════════════════════════════════════ -->
+  <div class="content">
+
+    <header class="topbar">
+      <div style="display:flex;align-items:center;gap:12px">
+        <button class="btn-menu" id="btnMenu">☰</button>
+        <div class="topbar-left">
+          <h1 id="pageTitle">Consumo</h1>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <div class="status-pill" id="statusTag">
+          <span class="dot"></span>
+          <span>Aguardando</span>
+        </div>
+        <a class="btn-sair" href="index.html">Sair</a>
+      </div>
+    </header>
+
+    <div id="feedbackBox" class="feedback-bar"></div>
+
+    <!-- KPIs sempre visíveis -->
+    <div class="kpis-bar" id="kpisBar">
+      <div class="kpi-card">
+        <div class="kpi-label">Disp. ativos</div>
+        <div class="kpi-value" id="kpiOnline">—</div>
+        <div class="kpi-sub">Cadastro ativo</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Disp. inativos</div>
+        <div class="kpi-value" id="kpiOffline" style="color:#fb7185">—</div>
+        <div class="kpi-sub">Cadastro inativo</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Alertas pendentes</div>
+        <div class="kpi-value" id="kpiAtraso" style="color:#fbbf24">—</div>
+        <div class="kpi-sub">Não resolvidos</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Total alertas</div>
+        <div class="kpi-value" id="kpiAlerts">—</div>
+        <div class="kpi-sub">Retornados pela API</div>
+      </div>
+    </div>
+
+    <!-- ──────────────────────────────
+         PÁGINA: CONSUMO
+    ────────────────────────────── -->
+    <div class="page active" id="page-consumo">
+      <div class="card">
+        <div class="card-head">
+          <div>
+            <h2 id="chartTitle">Consumo geral</h2>
+            <p id="chartSubtitle">Monitoramento do consumo energético diário dos quadros elétricos.</p>
+          </div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+            <label class="chip">
+              Período
+              <select id="intervalo">
+                <option value="20"selected>20 dias</option>
+                <option value="7">7 dias</option>
+                <option value="24h">24 horas</option>
+              </select>
+              </label>
+               <label class="chip">
+                Dispositivo
+                <select id="selDispositivoConsumo">
+                  <option value="">Todos os dispositivos</option>
+                </select>
+              </label>
+          </div>
+        </div>
+        <div class="chart-wrap">
+          <div class="chart-inner">
+            <canvas id="chartW"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ──────────────────────────────
+         PÁGINA: POTÊNCIA ← NOVA
+    ────────────────────────────── -->
+    <div class="page" id="page-potencia">
+
+      <!-- Cards de resumo das 3 fases -->
+      <div class="potencia-kpis">
+        <div class="pot-card">
+          <div class="pot-label">Potência Ativa Total</div>
+          <div class="pot-value" id="potAtivaTot">— <span>W</span></div>
+          <div class="pot-sub">Trabalho real consumido</div>
+        </div>
+        <div class="pot-card">
+          <div class="pot-label">Potência Aparente Total</div>
+          <div class="pot-value" id="potAparenteTot">— <span>VA</span></div>
+          <div class="pot-sub">Produto vetorial I × V</div>
+        </div>
+        <div class="pot-card">
+          <div class="pot-label">Potência Reativa Total</div>
+          <div class="pot-value" id="potReativaTot">— <span>VAr</span></div>
+          <div class="pot-sub">Componente indutiva/capacitiva</div>
+        </div>
+        <div class="pot-card pot-card--fp">
+          <div class="pot-label">Fator de Potência Médio</div>
+          <div class="pot-value" id="fatPotMedio">— <span>cos(ϕ)</span></div>
+          <div class="pot-sub">Eficiência da carga</div>
+        </div>
+      </div>
+
+      <!-- Tabela por fase -->
+      <div class="card">
+        <div class="card-head">
+          <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;">
+            <label class="chip">
+              Dispositivo
+              <select id="selDispositivoPotencia">
+                <option value="">Carregando...</option>
+              </select>
+            </label>
+            <label class="chip">
+              Fase
+              <select id="selFasePotencia">
+                <option value="">Todas as fases</option>
+                <option value="A">Fase A</option>
+                <option value="B">Fase B</option>
+                <option value="C">Fase C</option>
+              </select>
+            </label>
+          </div>
+          <button class="btn-action primary" id="btnRefreshPotencia" style="width:auto;padding:8px 16px;border-radius:10px;font-size:12px;">↺ Atualizar</button>
+        </div>
+        <div class="table-wrap">
+          <table class="table" id="tableFases">
+            <thead>
+              <tr>
+                <th>Fase</th>
+                <th>Corrente (A)</th>
+                <th>Tensão (V)</th>
+                <th>P. Ativa (W)</th>
+                <th>P. Aparente (VA)</th>
+                <th>P. Reativa (VAr)</th>
+                <th>Fator de Potência</th>
+                <th>Timestamp</th>
+              </tr>
+            </thead>
+            <tbody id="tbodyFases">
+              <tr><td colspan="8">Carregando medições...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Gráfico temporal potência -->
+      <div class="card">
+        <div class="card-head">
+          <div>
+            <h2>Comparativo Energético por Fase</h2>
+            <p>Comparação entre potência ativa, aparente e reativa em cada fase monitorada.</p>
+          </div>
+        </div>
+        <div class="chart-wrap">
+          <div class="chart-inner">
+            <canvas id="chartPotencia"></canvas>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ──────────────────────────────
+         PÁGINA: MEDIÇÕES
+    ────────────────────────────── -->
+    <div class="page" id="page-medicoes">
+      <div class="card">
+        <div class="card-head">
+          <div>
+            <h2>Tensão e corrente</h2>
+            <p>Médias diárias de tensão (V) e corrente (A) do período.</p>
+          </div>
+          <label class="chip">
+            Tipo
+            <select id="chartModeMedicoes">
+              <option value="tensao" selected>Tensão (V)</option>
+              <option value="corrente">Corrente (A)</option>
+            </select>
+          </label>
+        </div>
+        <div class="chart-wrap">
+          <div class="chart-inner">
+            <canvas id="chartMedicoes"></canvas>
+          </div>
+        </div>
+        <div class="chart-hint">Selecione um quadro ou dispositivo para filtrar as medições.</div>
+      </div>
+    </div>
+
+    <!-- ──────────────────────────────
+         PÁGINA: ALERTAS
+    ────────────────────────────── -->
+    <div class="page" id="page-alertas">
+      <div class="card">
+        <div class="card-head">
+          <div>
+            <h2>Alertas pendentes</h2>
+            <p>Alertas ainda não resolvidos no contexto selecionado.</p>
+          </div>
+        </div>
+        <ul class="alerts" id="alertsList">
+          <li class="alert-item"><p>Carregando alertas...</p></li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <div>
+            <h2>Histórico de alertas</h2>
+            <p>Todos os eventos do contexto selecionado.</p>
+          </div>
+          <label class="chip">
+            Tipo
+            <select id="eventFilter">
+              <option value="">Todos</option>
+              <option value="sobrecorrente">Sobrecorrente</option>
+              <option value="consumo_fora_horario">Fora do horário</option>
+              <option value="queda_brusca">Queda brusca</option>
+            </select>
+          </label>
+        </div>
+        <div class="table-wrap">
+          <table class="table" id="tableEvents">
+            <thead>
+              <tr>
+                <th>Data/hora</th>
+                <th>Tipo</th>
+                <th>Severidade</th>
+                <th>Dispositivo</th>
+                <th>Descrição</th>
+                <th>Status</th>
+                <th>Ação</th>
+              </tr>
+            </thead>
+            <tbody><tr><td colspan="7">Carregando...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ──────────────────────────────
+         PÁGINA: DISPOSITIVOS
+    ────────────────────────────── -->
+    <div class="page" id="page-dispositivos">
+      <div class="card">
+        <div class="card-head">
+          <div>
+            <h2>Dispositivos do quadro</h2>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table class="table" id="tableSensors">
+            <thead>
+              <tr>
+                <th>Dispositivo</th><th>Status</th>
+                <th>Última data</th><th>Consumo (período)</th>
+              </tr>
+            </thead>
+            <tbody><tr><td colspan="4">Selecione um quadro.</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <footer style="padding:0 24px 20px;font-size:12px;color:rgba(234,240,255,.35)">
+      Safe Energy • Manutenção
+    </footer>
+  </div>
+</div>
+
+<script src="manutencao.js"></script>
+</body>
+</html>
