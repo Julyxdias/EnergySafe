@@ -2,8 +2,8 @@
 
 API REST construída com **FastAPI** para a plataforma de monitoramento energético EnergySafe. Recebe medições dos dispositivos ESP32, detecta alertas automaticamente, calcula consumo diário, gerencia faturas com rateio por área e gera relatórios em PDF.
 
-> **Deploy:** [backendsafe.onrender.com](https://backendsafe.onrender.com)  
-> **Docs interativas:** [backendsafe.onrender.com/docs](https://backendsafe.onrender.com/docs)
+> **Deploy:** VPS via Docker Compose, atrás de um Nginx que roteia `/api/` para o container do backend — [energysafe.eco.br](https://energysafe.eco.br)  
+> **Docs interativas:** [energysafe.eco.br/docs](https://energysafe.eco.br/docs)
 
 ---
 
@@ -17,7 +17,7 @@ API REST construída com **FastAPI** para a plataforma de monitoramento energét
 | Scheduler | APScheduler (job noturno 00:05) |
 | PDF | ReportLab |
 | HTTP client | HTTPX (integração Enel) |
-| Deploy | Render.com |
+| Deploy | VPS (Docker Compose + Nginx + Certbot) |
 
 ---
 
@@ -61,9 +61,8 @@ BackendSafe/
 ### 2. Clone e instale as dependências
 
 ```bash
-git clone https://github.com/Julyxdias/BackendSafe.git
-cd BackendSafe
-git checkout Julyxdias-Backend-API
+git clone https://github.com/Julyxdias/EnergySafe.git
+cd EnergySafe/backend
 
 python -m venv venv
 source venv/bin/activate  # Windows: venv\Scripts\activate
@@ -214,11 +213,11 @@ ENEL_SERVICE_KEY=sua-chave-de-api
 
 ## 🌐 CORS
 
-Origens permitidas por padrão:
+Em produção, o frontend é servido pelo mesmo Nginx/domínio (`energysafe.eco.br`) que faz proxy de `/api/` para o backend — ou seja, mesma origem, sem necessidade de CORS liberado para o domínio de produção.
+
+Origens adicionais permitidas (ambiente de desenvolvimento local):
 
 ```
-https://energy-safe.vercel.app
-https://energy-safe-9m2q.vercel.app
 http://localhost:5500
 http://127.0.0.1:5500
 ```
@@ -230,8 +229,8 @@ Para adicionar origens, edite a lista `allow_origins` em `main.py`.
 ## 🔗 Relacionado
 
 - [Firmware ESP32 — EnergySafe v3.0](../firmware/) — coleta e envia as medições
-- [Banco de dados (schema SQL)](../database/) — schema PostgreSQL completo
-- [Frontend](https://github.com/Julyxdias/BackendSafe) — interface web (Vercel)
+- [Frontend](../frontend/README.md) — interface web servida pelo Nginx no mesmo domínio
+- [Configuração do Nginx](../nginx/) — proxy reverso e TLS (Certbot)
 
 ---
 
