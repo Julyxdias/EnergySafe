@@ -170,7 +170,7 @@ Ajuste a constante `API_BASE` em cada `.js` para apontar para o backend local ou
 
 Projeto acadêmico desenvolvido como sistema aplicado.
 
-| Papel | Responsabilidade |
+| Papel | Responsabilidade | Responsáveis |
 |---|---|---|
 | Hardware & Firmware | Sensores, ESP32, calibração, buffer SD | Giovanna Hototian |
 | Backend | API FastAPI, banco de dados, alertas, rateio | Julya Dias |
