@@ -3,7 +3,6 @@
 API REST construída com **FastAPI** para a plataforma de monitoramento energético EnergySafe. Recebe medições dos dispositivos ESP32, detecta alertas automaticamente, calcula consumo diário, gerencia faturas com rateio por área e gera relatórios em PDF.
 
 > **Deploy:** VPS via Docker Compose, atrás de um Nginx que roteia `/api/` para o container do backend — [energysafe.eco.br](https://energysafe.eco.br)  
-> **Docs interativas:** [energysafe.eco.br/docs](https://energysafe.eco.br/docs)
 
 ---
 
