@@ -4,7 +4,7 @@ Plataforma IoT de monitoramento energético para instituições com múltiplas �
 
 > O sistema **não controla cargas**. Ele monitora, registra, alerta e analisa.
 
-🔗 **Produção:** [energysafe.eco.br](https://energysafe.eco.br) · **API:** [https://energysafe.eco.br/api/]
+🔗 **Produção:** [energysafe.eco.br](https://energysafe.eco.br) · **API:** [energysafe.eco.br/api](https://energysafe.eco.br/api/)
 
 ---
 
@@ -171,10 +171,10 @@ Ajuste a constante `API_BASE` em cada `.js` para apontar para o backend local ou
 Projeto acadêmico desenvolvido como sistema aplicado.
 
 | Papel | Responsabilidade |
-|---|---|
-| Hardware & Firmware | Sensores, ESP32, calibração, buffer SD | Giovanna Hototian
-| Backend | API FastAPI, banco de dados, alertas, rateio | Julya Dias
-| Frontend | Dashboard, gráficos, exportação, UX | Karolaine Helena
+|---|---|---|
+| Hardware & Firmware | Sensores, ESP32, calibração, buffer SD | Giovanna Hototian |
+| Backend | API FastAPI, banco de dados, alertas, rateio | Julya Dias |
+| Frontend | Dashboard, gráficos, exportação, UX | Karolaine Helena |
 
 ---
 
