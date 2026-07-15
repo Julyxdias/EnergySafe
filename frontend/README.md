@@ -2,7 +2,7 @@
 
 Interface web da plataforma EnergySafe. Dashboard estático em **HTML + CSS + JavaScript puro** com dois painéis de acesso por perfil: financeiro e manutenção. Sem frameworks — apenas Chart.js para os gráficos.
 
-> **Deploy:** [energy-safe.vercel.app](https://energy-safe.vercel.app)
+> **Deploy:** VPS via Nginx, servido como arquivo estático no mesmo domínio da API — [energysafe.eco.br](https://energysafe.eco.br)
 
 ---
 
@@ -161,7 +161,7 @@ Em cada arquivo `.js`, localize e ajuste a constante da URL da API:
 const API_BASE = "http://localhost:8000";
 
 // Produção
-const API_BASE = "https://backendsafe.onrender.com";
+const API_BASE = "https://energysafe.eco.br/api";
 ```
 
 ### Filtros em cascata
@@ -206,24 +206,39 @@ Todas carregadas via CDN — sem instalação:
 
 ---
 
-## 🌐 Deploy (Vercel)
+## 🌐 Deploy (VPS via Docker Compose + Nginx)
 
-O frontend é **100% estático** — pode ser publicado em qualquer CDN ou serviço de hosting estático.
+O frontend é **100% estático** e é servido diretamente pelo Nginx, no mesmo domínio da API.
 
-Para publicar na Vercel:
+No `docker-compose.yml` da raiz, a pasta `frontend/` é montada como volume somente-leitura no container do Nginx:
 
-1. Faça fork do repositório
-2. Importe no [vercel.com](https://vercel.com)
-3. Configure a variável de API_BASE nos arquivos `.js` apontando para o backend em produção
-4. Deploy automático a cada push
+```yaml
+nginx:
+  volumes:
+    - ./frontend:/usr/share/nginx/html:ro
+```
+
+O `nginx/nginx-https.conf` (ou `nginx.conf` sem TLS) trata as rotas:
+
+```
+location /            → arquivos estáticos do frontend
+location /api/        → proxy para o backend (FastAPI)
+location /docs        → proxy para o Swagger do backend
+```
+
+Para publicar uma alteração:
+
+1. Ajuste os arquivos em `frontend/` (confirme o `API_BASE` de produção nos `.js`)
+2. Suba as mudanças na VPS
+3. `docker compose up -d --build` (ou apenas restart do serviço `nginx`, já que os arquivos são montados por volume)
 
 ---
 
 ## 🔗 Relacionado
 
-- [Backend API — EnergySafe](https://github.com/Julyxdias/BackendSafe/tree/Julyxdias-Backend-API) — FastAPI que serve os dados
+- [Backend API](../backend/README.md) — FastAPI que serve os dados
 - [Firmware ESP32](../firmware/) — coleta as medições nos quadros elétricos
-- [Schema do banco](../database/) — PostgreSQL com schema completo
+- [Configuração do Nginx](../nginx/) — proxy reverso e TLS (Certbot)
 
 ---
 
