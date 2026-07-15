@@ -59,8 +59,6 @@ O EnergySafe torna o rateio **justo, transparente e auditável**, baseado na med
 | **Frontend** | Dashboard estático (HTML + CSS + JS + Chart.js) com painéis por perfil: financeiro e manutenção. | [`frontend/README.md`](./frontend/README.md) |
 | **Infra (Nginx + Docker)** | Reverse proxy roteando `/api/` para o backend, TLS via Certbot, orquestração via Docker Compose. | [`nginx/`](./nginx), [`docker-compose.yml`](./docker-compose.yml) |
 
-Visão detalhada do projeto, ODS alinhados e fluxo completo do rateio: veja [`frontend/ABOUT.md`](./frontend/ABOUT.md).
-
 ---
 
 ## 🗺️ Hierarquia de dados
