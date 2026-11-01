@@ -226,3 +226,18 @@ class DispositivoStatus(Base):
 
     dispositivo = relationship("Dispositivo", back_populates="status")
 
+
+
+class Usuario(Base):
+    """Usuários do sistema. perfil: manutencao | financeiro | master."""
+    __tablename__ = "usuarios"
+
+    id         = Column(Integer, primary_key=True, index=True)
+    email      = Column(String(120), unique=True, nullable=False, index=True)
+    senha_hash = Column(String(255), nullable=False)
+    perfil     = Column(String(20), nullable=False)
+    ativo      = Column(Boolean, nullable=False, server_default="true")
+
+    __table_args__ = (
+        CheckConstraint("perfil IN ('manutencao','financeiro','master')", name="ck_usuarios_perfil"),
+    )
