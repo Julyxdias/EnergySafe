@@ -10,15 +10,16 @@
    - GET /metas/
    ============================================================ */
 
-const API = "https://backendsafe.onrender.com";
+const API = API_URL; // definido em auth.js (/api em produção)
 
 /* ── Utilitários HTTP ── */
 async function apiFetch(path, opts = {}) {
   const url = API + path;
   const res = await fetch(url, {
-    headers: { Accept: "application/json" },
-    ...opts
+    ...opts,
+    headers: { Accept: "application/json", ...Auth.headers(), ...(opts.headers || {}) }
   });
+  if (res.status === 401) { Auth.logout(); throw new Error("Sessão expirada"); }
   if (!res.ok) throw new Error(`HTTP ${res.status} em ${path}`);
   return res.json();
 }
@@ -684,9 +685,20 @@ async function recalcularRateio() {
 }
 
 /* ── Baixar PDF ── */
-function baixarPdf() {
+async function baixarPdf() {
   if (!faturaAtualId) return;
-  window.open(`${API}/relatorios/rateio/${faturaAtualId}/`, "_blank");
+  // window.open direto não envia o token; busca o PDF autenticado e abre como blob
+  const janela = window.open("", "_blank");
+  try {
+    const res = await fetch(`${API}/relatorios/rateio/${faturaAtualId}/`, { headers: Auth.headers() });
+    if (res.status === 401) { Auth.logout(); return; }
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const blob = await res.blob();
+    janela.location.href = URL.createObjectURL(blob);
+  } catch (e) {
+    if (janela) janela.close();
+    setStatus("Erro ao gerar PDF", "error");
+  }
 }
 
 /* ── Eventos ── */

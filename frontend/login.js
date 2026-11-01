@@ -1,5 +1,6 @@
-const form = document.getElementById("loginForm");
+const form     = document.getElementById("loginForm");
 const errorBox = document.getElementById("errorBox");
+const btnLogin = form.querySelector("button[type='submit']");
 
 function showError(msg) {
   errorBox.textContent = msg;
@@ -11,32 +12,32 @@ function clearError() {
   errorBox.style.display = "none";
 }
 
-form.addEventListener("submit", function(e) {
+form.addEventListener("submit", async function (e) {
   e.preventDefault();
   clearError();
 
   const email    = document.getElementById("email").value.trim().toLowerCase();
-  const password = document.getElementById("password").value.trim();
+  const password = document.getElementById("password").value;
 
   if (!email || !password) {
     showError("Preencha e-mail e senha.");
     return;
   }
 
-  const emailFinanceiro = "financeiro@energia.com";
-  const emailManutencao = "manutencao@energia.com";
+  btnLogin.disabled = true;
+  const textoOriginal = btnLogin.textContent;
+  btnLogin.textContent = "Entrando...";
 
-  if (email === emailFinanceiro) {
-    localStorage.setItem("perfil", "financeiro");
-    window.location.href = "financeiro.html";
-  } else if (email === emailManutencao) {
-    localStorage.setItem("perfil", "manutencao");
-    window.location.href = "manutencao.html";
-  } else {
-    showError("E-mail não autorizado.");
+  try {
+    const dados = await Auth.login(email, password);
+    window.location.href = Auth.paginaInicial(dados.perfil);
+  } catch (err) {
+    showError(err.message || "Falha no login.");
+    btnLogin.disabled = false;
+    btnLogin.textContent = textoOriginal;
   }
 });
 
-document.getElementById("btnSobre").addEventListener("click", function() {
+document.getElementById("btnSobre").addEventListener("click", function () {
   window.location.href = "sobre.html";
 });

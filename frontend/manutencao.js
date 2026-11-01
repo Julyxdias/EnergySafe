@@ -1,7 +1,7 @@
 /* ══════════════════════════════════════
    CONFIGURAÇÃO
 ══════════════════════════════════════ */
-const API_BASE = "https://backendsafe.onrender.com";
+const API_BASE = API_URL; // definido em auth.js (/api em produção)
 
 const FASES = ["A", "B", "C"];
 const DISPOSITIVOS_IDS = [1, 2, 3];
@@ -55,10 +55,11 @@ async function getJSON(path, params = {}, retries = 2) {
     try {
       const response = await fetch(url, {
         method: "GET",
-        headers: { Accept: "application/json" },
+        headers: { Accept: "application/json", ...Auth.headers() },
         signal: controller.signal
       });
       clearTimeout(timeout);
+      if (response.status === 401) { Auth.logout(); throw new Error("Sessão expirada"); }
       if (!response.ok) throw new Error(`HTTP ${response.status} em ${path}`);
       return await response.json();
     } catch (error) {
@@ -604,7 +605,7 @@ async function resolverAlerta(alertaId, botao = null) {
   try {
     if (botao) { botao.disabled = true; botao.textContent = "Resolvendo..."; }
     const response = await fetch(`${API_BASE}/alertas/${alertaId}/resolver`, {
-      method: "PATCH", headers: { Accept: "application/json" }
+      method: "PATCH", headers: { Accept: "application/json", ...Auth.headers() }
     });
     if (!response.ok) throw new Error(`Falha ao resolver alerta ${alertaId}`);
     showFeedback("Alerta marcado como resolvido.", "info");
